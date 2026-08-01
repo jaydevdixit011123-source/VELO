@@ -1,26 +1,36 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 import * as path from 'path';
 import { setupAIHandlers } from './ai';
-import { setupMemoryHandlers } from './memory';
 import { setupSkillHandlers } from './ipc';
 
+export let mainWindow: BrowserWindow | null = null;
+
 function createWindow() {
-  const mainWindow = new BrowserWindow({
-    width: 1000, height: 700, minWidth: 800, minHeight: 600,
-    title: 'VELO - Personal AI Assistant', backgroundColor: '#0f172a',
-    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false }
+  mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 780,
+    minWidth: 940,
+    minHeight: 600,
+    backgroundColor: '#0f172a',
+    title: 'VELO - Personal AI Assistant',
+    webPreferences: {
+      preload: path.join(__dirname, '../preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false
+    }
   });
-  // __dirname = dist/main/, so go up to project root then into src/renderer
-  const htmlPath = path.join(__dirname, '..', '..', 'src', 'renderer', 'index.html');
-  console.log('Loading HTML from:', htmlPath);
-  mainWindow.loadFile(htmlPath);
+  mainWindow.loadFile(path.join(__dirname, '../../src/renderer/index.html'));
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: 'deny' };
+  });
+  mainWindow.on('closed', () => { mainWindow = null; });
 }
 
 app.whenReady().then(() => {
-  createWindow();
   setupAIHandlers();
-  setupMemoryHandlers();
   setupSkillHandlers();
+  createWindow();
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });
 
