@@ -1,87 +1,86 @@
 @echo off
 setlocal enabledelayedexpansion
 title VELO Setup - Personal AI Assistant
+color 0A
 echo ========================================
 echo    VELO Setup - Personal AI Assistant
 echo ========================================
 echo.
+echo Checking requirements...
+echo.
 
 :: Check Node.js
 where node >nul 2>&1
-if %errorlevel% equ 0 (
-    for /f "tokens=*" %%v in ('node -v') do set NODE_VER=%%v
-    echo [OK] Node.js found: !NODE_VER!
-    echo       Already installed. Skipping Node.js install.
-) else (
-    echo [INFO] Node.js not found. Opening download page...
-    echo       Please install Node.js LTS first from:
-    echo       https://nodejs.org
+if %errorlevel% neq 0 (
+    echo [ERROR] Node.js not found!
+    echo Please install from: https://nodejs.org
     start https://nodejs.org
-    echo.
-    echo After installing Node.js, run this setup again.
     pause
     exit /b 1
 )
-echo.
+for /f "tokens=*" %%v in ('node -v') do echo [OK] Node.js: %%v
 
 :: Check npm
 where npm >nul 2>&1
-if %errorlevel% equ 0 (
-    for /f "tokens=*" %%v in ('npm -v') do set NPM_VER=%%v
-    echo [OK] npm found: v!NPM_VER!
-) else (
-    echo [ERROR] npm not found. Please reinstall Node.js.
+if %errorlevel% neq 0 (
+    echo [ERROR] npm not found! Reinstall Node.js.
     pause
     exit /b 1
 )
+for /f "tokens=*" %%v in ('npm -v') do echo [OK] npm: v%%v
+
+:: Go to VELO folder
+cd /d "%~dp0"
 echo.
-
-:: Get current directory
-set "VELO_DIR=%~dp0"
-cd /d "!VELO_DIR!"
-
-echo [STEP 1/3] Installing dependencies...
-echo This may take a few minutes...
-call npm install
+echo [STEP 1/3] Installing dependencies (1-2 min)...
+call npm install --legacy-peer-deps
 if %errorlevel% neq 0 (
-    echo [ERROR] npm install failed. Check your internet connection.
-    pause
-    exit /b 1
+    echo.
+    echo [ERROR] npm install failed!
+    echo Trying with --force...
+    call npm install --force
+    if %errorlevel% neq 0 (
+        echo [FATAL] Could not install. Check your internet.
+        pause
+        exit /b 1
+    )
 )
 echo [OK] Dependencies installed!
-echo.
 
-echo [STEP 2/3] Building TypeScript...
+echo.
+echo [STEP 2/3] Building VELO...
 call npm run build
 if %errorlevel% neq 0 (
-    echo [WARN] TypeScript build had issues. Trying to run anyway...
+    echo [WARN] Build had warnings, but let's try running anyway...
 )
-echo [OK] Build complete!
-echo.
+echo [OK] Build done!
 
+echo.
 echo [STEP 3/3] Checking Gemini API key...
 if not exist ".env" (
     echo.
-    echo You need a FREE Gemini API key for AI chat.
-    echo Get one here: https://aistudio.google.com/app/apikey
+    echo ============================================
+    echo   Get your FREE Gemini API key:
+    echo   https://aistudio.google.com/app/apikey
+    echo ============================================
     echo.
-    set /p API_KEY="Paste your Gemini API key (or press Enter to skip): "
+    set /p API_KEY="Paste key here (or Enter to skip): "
     if not "!API_KEY!"=="" (
+        setlocal disabledelayedexpansion
         echo GEMINI_API_KEY=!API_KEY!> .env
-        echo [OK] API key saved!
+        endlocal
+        echo [OK] Key saved!
     ) else (
-        echo [INFO] Skipped. You can add the key later in Settings ^> API Key.
+        echo [INFO] Skipped. Add later in Settings.
     )
 ) else (
-    echo [OK] .env file already exists.
+    echo [OK] .env already exists.
 )
-echo.
 
-echo ========================================
-echo    SETUP COMPLETE!
-echo    Launching VELO...
-echo ========================================
 echo.
+echo ========================================
+echo    SETUP COMPLETE! Launching VELO...
+echo ========================================
 timeout /t 2 >nul
-start "" start.bat
-exit /b 0
+call npm start
+pause

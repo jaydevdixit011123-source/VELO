@@ -1,26 +1,21 @@
 {
   "name": "velo-desktop",
-  "version": "1.1.0",
-  "description": "VELO - Personal AI Desktop Assistant (free, Gemini powered, zero native deps)",
+  "version": "1.0.0",
+  "description": "VELO - Personal AI Desktop Assistant (free, Gemini powered)",
   "main": "dist/main/index.js",
   "scripts": {
-    "start": "electron .",
-    "dev": "electron . --dev",
-    "build": "tsc",
-    "build:all": "tsc && electron-builder",
-    "dist": "electron-builder",
-    "postinstall": "electron-builder install-app-deps"
+    "start": "npx electron .",
+    "dev": "npx electron . --dev",
+    "build": "npx tsc",
+    "dist": "npx electron-builder"
   },
   "author": "Jaydev",
   "license": "MIT",
   "dependencies": {
-    "@google/generative-ai": "^0.21.0",
-    "electron-store": "^8.2.0"
+    "@google/generative-ai": "^0.21.0"
   },
   "devDependencies": {
-    "@types/node": "^20.14.0",
     "electron": "^31.0.2",
-    "electron-builder": "^24.13.3",
     "typescript": "^5.4.5"
   },
   "build": {
@@ -28,11 +23,6 @@
     "productName": "VELO",
     "directories": { "output": "release" },
     "files": ["dist/**/*", "package.json"],
-    "win": { "target": ["nsis"] },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true
-    }
+    "win": { "target": ["portable"] }
   }
 }
