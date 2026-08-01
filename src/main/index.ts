@@ -10,7 +10,10 @@ function createWindow() {
     title: 'VELO - Personal AI Assistant', backgroundColor: '#0f172a',
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false }
   });
-  mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+  // __dirname = dist/main/, so go up to project root then into src/renderer
+  const htmlPath = path.join(__dirname, '..', '..', 'src', 'renderer', 'index.html');
+  console.log('Loading HTML from:', htmlPath);
+  mainWindow.loadFile(htmlPath);
 }
 
 app.whenReady().then(() => {
