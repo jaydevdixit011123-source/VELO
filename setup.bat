@@ -1,48 +1,87 @@
 @echo off
-title VELO - Setup
-echo ============================================
-echo   VELO - Personal AI Assistant Setup
-echo ============================================
+setlocal enabledelayedexpansion
+title VELO Setup - Personal AI Assistant
+echo ========================================
+echo    VELO Setup - Personal AI Assistant
+echo ========================================
 echo.
-echo This will install everything you need for VELO.
-echo.
-echo Step 1: Check if Node.js is installed...
-node --version >nul 2>&1
-if %errorlevel% neq 0 (
-  echo [ERROR] Node.js not found. Please install it first.
-  echo Download from: https://nodejs.org (LTS version)
-  pause
-  exit /b 1
+
+:: Check Node.js
+where node >nul 2>&1
+if %errorlevel% equ 0 (
+    for /f "tokens=*" %%v in ('node -v') do set NODE_VER=%%v
+    echo [OK] Node.js found: !NODE_VER!
+    echo       Already installed. Skipping Node.js install.
+) else (
+    echo [INFO] Node.js not found. Opening download page...
+    echo       Please install Node.js LTS first from:
+    echo       https://nodejs.org
+    start https://nodejs.org
+    echo.
+    echo After installing Node.js, run this setup again.
+    pause
+    exit /b 1
 )
-echo [OK] Node.js found.
 echo.
-echo Step 2: Check if Git is installed...
-git --version >nul 2>&1
-if %errorlevel% neq 0 (
-  echo [WARN] Git not found. Installing via npm is fine, but GitHub features need Git.
-  echo Install from: https://git-scm.com
+
+:: Check npm
+where npm >nul 2>&1
+if %errorlevel% equ 0 (
+    for /f "tokens=*" %%v in ('npm -v') do set NPM_VER=%%v
+    echo [OK] npm found: v!NPM_VER!
+) else (
+    echo [ERROR] npm not found. Please reinstall Node.js.
+    pause
+    exit /b 1
 )
 echo.
-echo Step 3: Installing dependencies (this takes a minute)...
+
+:: Get current directory
+set "VELO_DIR=%~dp0"
+cd /d "!VELO_DIR!"
+
+echo [STEP 1/3] Installing dependencies...
+echo This may take a few minutes...
 call npm install
 if %errorlevel% neq 0 (
-  echo [ERROR] npm install failed.
-  pause
-  exit /b 1
+    echo [ERROR] npm install failed. Check your internet connection.
+    pause
+    exit /b 1
 )
-echo [OK] Dependencies installed.
+echo [OK] Dependencies installed!
 echo.
-echo Step 4: Building the app...
-call npx tsc
-echo [OK] Build complete.
+
+echo [STEP 2/3] Building TypeScript...
+call npm run build
+if %errorlevel% neq 0 (
+    echo [WARN] TypeScript build had issues. Trying to run anyway...
+)
+echo [OK] Build complete!
 echo.
-echo ============================================
-echo VELO is ready! Starting now...
+
+echo [STEP 3/3] Checking Gemini API key...
+if not exist ".env" (
+    echo.
+    echo You need a FREE Gemini API key for AI chat.
+    echo Get one here: https://aistudio.google.com/app/apikey
+    echo.
+    set /p API_KEY="Paste your Gemini API key (or press Enter to skip): "
+    if not "!API_KEY!"=="" (
+        echo GEMINI_API_KEY=!API_KEY!> .env
+        echo [OK] API key saved!
+    ) else (
+        echo [INFO] Skipped. You can add the key later in Settings ^> API Key.
+    )
+) else (
+    echo [OK] .env file already exists.
+)
 echo.
-echo Tip: To get a free Gemini API key, visit:
-echo      https://aistudio.google.com/app/apikey
-echo      (Then open VELO Settings and paste it)
-echo ============================================
+
+echo ========================================
+echo    SETUP COMPLETE!
+echo    Launching VELO...
+echo ========================================
 echo.
-call npm start
-pause
+timeout /t 2 >nul
+start "" start.bat
+exit /b 0
