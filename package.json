@@ -1,7 +1,7 @@
 {
   "name": "velo-desktop",
-  "version": "1.0.0",
-  "description": "VELO - Personal AI Desktop Assistant (free, Groq powered)",
+  "version": "2.0.0",
+  "description": "VELO - Personal AI Desktop Assistant (Free, Groq powered)",
   "main": "dist/main/index.js",
   "scripts": {
     "start": "npx electron .",
