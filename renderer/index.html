@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src https://api.groq.com https://translate.google.com;">
+  <title>VELO - Personal AI Assistant</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">&#9670; VELO</div>
+      <nav id="nav">
+        <button class="nav-btn active" data-view="chat">&#128172; Chat</button>
+        <button class="nav-btn" data-view="voice">&#127908; Voice</button>
+        <button class="nav-btn" data-view="files">&#128193; Files</button>
+        <button class="nav-btn" data-view="notes">&#128221; Notes</button>
+        <button class="nav-btn" data-view="pc">&#128421; PC Control</button>
+        <button class="nav-btn" data-view="github">&#128026; GitHub</button>
+        <button class="nav-btn" data-view="browser">&#127760; Browser</button>
+        <button class="nav-btn" data-view="reminders">&#9200; Reminders</button>
+        <button class="nav-btn" data-view="calendar">&#128197; Calendar</button>
+        <button class="nav-btn" data-view="memory">&#128190; Memory</button>
+        <button class="nav-btn" data-view="settings">&#9881; Settings</button>
+      </nav>
+      <div class="sidebar-footer">
+        <span class="version">v2.2 &#8226; free</span>
+        <span class="voice-status" id="voice-status"></span>
+        <button class="voice-fab" id="voice-fab" title="Voice (Hey Velo)">&#127908;</button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+      <!-- CHAT -->
+      <section class="view active" id="view-chat">
+        <div class="view-header">
+          <h2>Chat with VELO</h2>
+          <span class="status-badge ok" id="chat-status">Groq ready</span>
+        </div>
+        <div class="chat-messages" id="messages"></div>
+        <div class="chat-input-area">
+          <textarea id="chat-input" rows="1" placeholder="Type here or say Hey Velo..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+          <button class="btn-primary" id="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+      </section>
+
+      <!-- VOICE -->
+      <section class="view" id="view-voice">
+        <div class="view-header"><h2>Voice Assistant</h2><span class="status-badge ok" id="voice-status-badge">Mic ready</span></div>
+        <div class="voice-center">
+          <button class="voice-ring" id="voice-ring" onclick="toggleVoice()">&#127908;</button>
+          <div class="voice-text" id="voice-text">Press the mic or say "Hey Velo" to start</div>
+          <p style="color:var(--muted);font-size:12px;">Speak in Hindi or English</p>
+        </div>
+      </section>
+
+      <!-- FILES -->
+      <section class="view" id="view-files">
+        <div class="view-header"><h2>File Manager</h2><button class="btn-secondary" onclick="chooseFolder()">Open Folder</button></div>
+        <div class="panel-body">
+          <div class="panel-actions">
+            <input type="text" id="file-search" placeholder="Search files..." oninput="searchFiles()">
+            <button class="btn-primary btn-sm" onclick="listFiles()">Refresh</button>
+          </div>
+          <div class="file-list" id="file-list"></div>
+        </div>
+      </section>
+
+      <!-- NOTES -->
+      <section class="view" id="view-notes">
+        <div class="view-header"><h2>Notes</h2></div>
+        <div class="panel-body">
+          <div class="panel-actions">
+            <input type="text" id="note-input" placeholder="Write a quick note..." onkeydown="if(event.key==='Enter'){addNote();}">
+            <button class="btn-primary" onclick="addNote()">Add</button>
+          </div>
+          <div class="list-items" id="notes-list"></div>
+        </div>
+      </section>
+
+      <!-- PC CONTROL -->
+      <section class="view" id="view-pc">
+        <div class="view-header"><h2>PC Control</h2></div>
+        <div class="panel-body">
+          <div class="panel-actions">
+            <input type="text" id="pc-app" placeholder="App name e.g. chrome, notepad, calculator...">
+            <button class="btn-primary" onclick="openApp()">Open App</button>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+            <button class="btn-primary" onclick="V.pc.volume('up').then(toast)">&#128266; Vol+</button>
+            <button class="btn-secondary" onclick="V.pc.volume('down').then(toast)">&#128264; Vol-</button>
+            <button class="btn-secondary" style="color:var(--danger);border-color:var(--danger);" onclick="if(confirm('Shutdown in 60s?'))V.pc.shutdown().then(toast)">&#128164; Shutdown</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- GITHUB -->
+      <section class="view" id="view-github">
+        <div class="view-header"><h2>GitHub</h2></div>
+        <div class="panel-body">
+          <div class="panel-actions">
+            <input type="text" id="git-dir" placeholder="Repo path (or leave for home)">
+            <button class="btn-primary" onclick="gitCmd('status')">Status</button>
+            <button class="btn-secondary" onclick="gitCmd('log --oneline -5')">Log</button>
+            <button class="btn-secondary" onclick="gitCmd('branch')">Branches</button>
+          </div>
+          <pre id="git-output" style="background:var(--bg);padding:16px;border-radius:var(--radius);font-size:12px;max-height:400px;overflow-y:auto;color:var(--muted);"></pre>
+        </div>
+      </section>
+
+      <!-- BROWSER -->
+      <section class="view" id="view-browser">
+        <div class="view-header"><h2>Browser</h2></div>
+        <div class="panel-body">
+          <div class="panel-actions">
+            <input type="text" id="browser-url" placeholder="URL or search query..." onkeydown="if(event.key==='Enter'){openBrowser();}">
+            <button class="btn-primary" onclick="openBrowser()">Go</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- REMINDERS -->
+      <section class="view" id="view-reminders">
+        <div class="view-header"><h2>Reminders</h2></div>
+        <div class="panel-body">
+          <div class="panel-actions">
+            <input type="text" id="reminder-title" placeholder="What to remember?">
+            <input type="text" id="reminder-time" placeholder="When? e.g. 8 PM" style="max-width:150px;">
+            <button class="btn-primary" onclick="addReminder()">Add</button>
+          </div>
+          <div class="list-items" id="reminders-list"></div>
+        </div>
+      </section>
+
+      <!-- CALENDAR -->
+      <section class="view" id="view-calendar">
+        <div class="view-header"><h2>Calendar</h2></div>
+        <div class="panel-body">
+          <div class="panel-actions">
+            <input type="text" id="event-title" placeholder="Event name">
+            <input type="date" id="event-date" style="max-width:160px;">
+            <button class="btn-primary" onclick="addEvent()">Add Event</button>
+          </div>
+          <div class="list-items" id="events-list"></div>
+        </div>
+      </section>
+
+      <!-- MEMORY -->
+      <section class="view" id="view-memory">
+        <div class="view-header"><h2>Memory</h2></div>
+        <div class="panel-body">
+          <div class="panel-actions">
+            <input type="text" id="mem-key" placeholder="Key" style="max-width:200px;">
+            <input type="text" id="mem-value" placeholder="Value">
+            <button class="btn-primary" onclick="addMemory()">Remember</button>
+          </div>
+          <div class="list-items" id="memory-list"></div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="view" id="view-settings">
+        <div class="view-header"><h2>Settings</h2></div>
+        <div class="panel-body" style="display:flex;justify-content:center;">
+          <div class="settings-card">
+            <h3>&#9889; Groq API Key <span style="font-size:12px;color:var(--success);">FREE</span></h3>
+            <p class="hint">Get your free key from: <a href="#" onclick="return false;">https://console.groq.com/keys</a> (no credit card needed!)</p>
+            <input type="password" id="settings-key" placeholder="gsk_... paste your Groq key here">
+            <button class="btn-primary" onclick="saveSettings()" style="width:100%;">Save Key</button>
+            <div class="key-status" id="key-status"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
