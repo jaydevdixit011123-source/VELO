@@ -5,9 +5,7 @@
   "main": "dist/main/index.js",
   "scripts": {
     "start": "npx electron .",
-    "dev": "npx electron . --dev",
-    "build": "npx tsc",
-    "dist": "npx electron-builder"
+    "build": "npx tsc"
   },
   "author": "Jaydev",
   "license": "MIT",
@@ -17,12 +15,5 @@
   "devDependencies": {
     "electron": "^31.0.2",
     "typescript": "^5.4.5"
-  },
-  "build": {
-    "appId": "com.jaydev.velo",
-    "productName": "VELO",
-    "directories": { "output": "release" },
-    "files": ["dist/**/*", "package.json"],
-    "win": { "target": ["portable"] }
   }
 }
