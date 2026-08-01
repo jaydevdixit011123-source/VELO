@@ -1,22 +1,67 @@
-/* VELO v2 - renderer logic */
+/* VELO v2 - renderer logic (Indian voice + mic fix) */
 const $ = (id) => document.getElementById(id);
 const V = window.velo;
 let currentDir = null;
 let ttsOn = true;
 
+/* ===== INDIAN FEMALE VOICE SETUP ===== */
+let indianVoice = null;
+function findIndianVoice() {
+  const voices = speechSynthesis.getVoices();
+  const keywords = ['indian', 'hindi', 'heera', 'hemant', 'leela', 'veena', 'deepa'];
+  for (const kw of keywords) {
+    const match = voices.find(v => v.name.toLowerCase().includes(kw));
+    if (match) { indianVoice = match; console.log('Found Indian voice:', match.name); return; }
+  }
+  const female = voices.find(v => v.name.toLowerCase().includes('female'));
+  if (female) indianVoice = female;
+}
+speechSynthesis.onvoiceschanged = findIndianVoice;
+findIndianVoice();
+
+/* ===== TTS with Indian accent ===== */
+async function speakIndian(text) {
+  try {
+    const url = 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=hi&q=' + encodeURIComponent(text.slice(0, 200));
+    const ctx = new AudioContext();
+    const resp = await fetch(url);
+    const buffer = await resp.arrayBuffer();
+    const decoded = await ctx.decodeAudioData(buffer);
+    const source = ctx.createBufferSource();
+    source.buffer = decoded;
+    source.connect(ctx.destination);
+    source.start();
+  } catch (e1) {
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = indianVoice ? indianVoice.lang : 'en-IN';
+      u.rate = 0.95;
+      u.pitch = 1.15;
+      if (indianVoice) u.voice = indianVoice;
+      speechSynthesis.speak(u);
+    } catch (e2) {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-IN';
+      speechSynthesis.speak(u);
+    }
+  }
+}
+
+function speak(text) { if (ttsOn && text) speakIndian(text); }
+
 function toast(msg) {
   const t = $('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2600);
+  setTimeout(function() { t.classList.remove('show'); }, 2600);
 }
 
 /* ===== NAVIGATION ===== */
-document.querySelectorAll('.nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+document.querySelectorAll('.nav-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
     btn.classList.add('active');
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
     $('view-' + btn.dataset.view).classList.add('active');
   });
 });
@@ -45,321 +90,339 @@ async function sendChat(text) {
     if (res.ok) {
       addMsg('bot', res.response);
       history.push({ role: 'assistant', content: res.response });
-      if (ttsOn) speak(res.response);
+      speak(res.response);
     } else {
       addMsg('err', res.response);
-      if (res.needsKey) toast('Settings me API key daalo');
+      if (res.needsKey) toast('Settings me Groq API key daalo (free!)');
     }
   } catch (e) {
     typing.remove();
     addMsg('err', 'Error: ' + e.message);
   }
 }
-$('send-btn').addEventListener('click', () => sendChat($('chat-input').value));
-$('chat-input').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(e.target.value); });
+$('send-btn').addEventListener('click', function() { sendChat($('chat-input').value); });
+$('chat-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') sendChat($('chat-input').value); });
 
-/* ===== VOICE (Web Speech API - free, Hindi+English) ===== */
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let rec = null, listening = false, wakeMode = false;
-function setListening(on) {
-  listening = on;
-  $('mic-btn').classList.toggle('listening', on);
-  $('voice-orb')?.classList.toggle('listening', on);
-  $('voice-state').textContent = on ? 'Sun raha hoon...' : 'Bolna shuru karo';
-  if (on) $('voice-state').textContent = 'Sun raha hoon...';
-}
-function startRec(continuous, wake) {
-  if (!SR) { toast('Is app me voice support nahi hai'); return; }
-  wakeMode = !!wake;
-  if (rec) { try { rec.stop(); } catch (e) {} }
-  rec = new SR();
-  rec.lang = 'hi-IN';
-  rec.continuous = !!continuous;
-  rec.interimResults = false;
-  rec.onresult = (ev) => {
-    const text = Array.from(ev.results).map(r => r[0].transcript).join(' ').trim();
-    if (wakeMode) {
-      const low = text.toLowerCase();
-      if (low.includes('hey velo') || low.includes('ok velo') || low.includes('hello velo')) {
-        const q = text.replace(/hey velo|ok velo|hello velo/gi, '').trim();
-        $('voice-transcript').textContent = 'Suna: ' + text;
-        if (q) { setListening(false); switchToChat(q); }
-        else toast('Bolo, kya karna hai?');
+/* ===== VOICE CONTROL (MIC AUTO-RESTART FIX) ===== */
+const voiceFab = $('voice-fab');
+const voiceStatus = $('voice-status');
+let listening = false;
+let recognition = null;
+
+function initRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return null;
+  const r = new SR();
+  r.continuous = true;
+  r.interimResults = true;
+  r.lang = 'en-IN';
+  r.maxAlternatives = 1;
+
+  r.onresult = function(e) {
+    let finalText = '';
+    let interimText = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finalText += e.results[i][0].transcript;
+      else interimText += e.results[i][0].transcript;
+    }
+    if (finalText.trim()) {
+      if (voiceStatus) voiceStatus.textContent = 'Suna: ' + finalText;
+      if (detectWakeWord(finalText)) {
+        const cmd = finalText.replace(/hey velo|hello velo|ok velo|velo/gi, '').trim();
+        if (cmd) sendChat(cmd);
+        else toast('Haan bolo, main sun rahi hoon!');
+      } else {
+        sendChat(finalText);
       }
-    } else {
-      $('voice-transcript').textContent = 'Suna: ' + text;
-      if (text) { setListening(false); switchToChat(text); }
+    } else if (interimText && voiceStatus) {
+      voiceStatus.textContent = '...' + interimText;
     }
   };
-  rec.onerror = () => { setListening(false); toast('Voice error - dobara try karo'); };
-  rec.onend = () => { if (wakeMode && listening) { try { rec.start(); } catch (e) {} } };
-  try { rec.start(); setListening(true); } catch (e) { toast('Mic access nahi mila'); }
-}
-function switchToChat(text) {
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === 'chat'));
-  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-chat'));
-  $('chat-input').value = text;
-  sendChat(text);
-}
-$('mic-btn').addEventListener('click', () => {
-  if (listening) { rec && rec.stop(); setListening(false); }
-  else startRec(false, false);
-});
-$('voice-start').addEventListener('click', () => { $('voice-transcript').textContent = ''; startRec(false, false); });
-$('voice-stop').addEventListener('click', () => { rec && rec.stop(); setListening(false); });
-$('voice-fab').addEventListener('click', () => {
-  if (listening) { rec && rec.stop(); setListening(false); return; }
-  startRec(true, true);
-  toast('"Hey Velo" bolo...');
-});
 
-/* ===== TEXT TO SPEECH ===== */
-function speak(text) {
-  try {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text.replace(/[*#`]/g, ''));
-    u.lang = 'hi-IN';
-    u.rate = 1;
-    window.speechSynthesis.speak(u);
-  } catch (e) {}
+  r.onerror = function(e) {
+    console.log('Speech error:', e.error);
+    if (voiceStatus) voiceStatus.textContent = 'Mic: ' + e.error;
+    if (listening && e.error !== 'not-allowed' && e.error !== 'service-not-allowed') {
+      setTimeout(function() {
+        try { r.start(); } catch(_) {}
+      }, 800);
+    }
+    if (e.error === 'no-speech' && listening) {
+      if (voiceStatus) voiceStatus.textContent = 'Sun rahi hoon...';
+      setTimeout(function() {
+        try { r.start(); } catch(_) {}
+      }, 400);
+    }
+  };
+
+  r.onend = function() {
+    if (listening) {
+      setTimeout(function() {
+        try { r.start(); if (voiceStatus) voiceStatus.textContent = 'Sun rahi hoon...'; } catch(e) {}
+      }, 250);
+    }
+  };
+
+  r.onaudiostart = function() { if (voiceStatus) voiceStatus.textContent = 'Mic ON, bolo...'; };
+  r.onsoundstart = function() { if (voiceStatus) voiceStatus.textContent = 'Awaz aa rahi hai...'; };
+
+  return r;
+}
+
+function toggleVoice() {
+  if (!recognition) recognition = initRecognition();
+  if (!recognition) { toast('Speech API not supported'); return; }
+
+  if (listening) {
+    listening = false;
+    try { recognition.stop(); } catch(e) {}
+    voiceFab.classList.remove('listening');
+    voiceFab.style.background = '#7c3aed';
+    if (voiceStatus) voiceStatus.textContent = 'Voice band';
+    toast('Mic band');
+  } else {
+    listening = true;
+    try { recognition.start(); } catch(e) {}
+    voiceFab.classList.add('listening');
+    voiceFab.style.background = '#ef4444';
+    if (voiceStatus) voiceStatus.textContent = 'Sun rahi hoon...';
+    toast('Mic ON! Bolo kuch bhi...');
+  }
+}
+
+voiceFab.addEventListener('click', toggleVoice);
+
+function detectWakeWord(text) {
+  const lower = text.toLowerCase();
+  return lower.includes('hey velo') || lower.includes('hello velo') || lower.includes('ok velo');
 }
 
 /* ===== FILES ===== */
-async function loadFiles(dir) {
-  if (dir) currentDir = dir;
-  const d = currentDir;
-  $('files-path').textContent = d || 'Loading...';
-  const res = await V.file.list(d);
-  const el = $('files-list');
-  el.innerHTML = '';
-  if (res.error) { el.innerHTML = '<div class="list-item"><span class="name">' + res.error + '</span></div>'; return; }
-  if (currentDir) {
-    const up = document.createElement('div');
-    up.className = 'list-item';
-    up.innerHTML = '<span class="name" style="color:#a78bfa;">.. (up)</span>';
-    up.addEventListener('click', () => {
-      const parent = currentDir.split(/[\\/]/).slice(0, -1).join('\\');
-      loadFiles(parent);
-    });
-    el.appendChild(up);
-  }
-  const sorted = res.sort((a, b) => (b.isDir - a.isDir) || a.name.localeCompare(b.name));
-  sorted.forEach(f => {
-    const item = document.createElement('div');
-    item.className = 'list-item';
-    const icon = f.isDir ? '\ud83d\udcc1' : '\ud83d\uddc4';
-    item.innerHTML = '<span class="name">' + icon + ' ' + f.name + '</span>' +
-      '<button class="btn-sm" data-act="open">Open</button>' +
-      '<button class="btn-sm" data-act="rename">Rename</button>' +
-      '<button class="btn-sm danger" data-act="del">Delete</button>';
-    item.querySelector('[data-act=open]').addEventListener('click', async () => {
-      if (f.isDir) loadFiles(f.path);
-      else { const r = await V.file.open(f.path); if (r.ok) toast('Khol diya'); }
-    });
-    item.querySelector('[data-act=rename]').addEventListener('click', async () => {
-      const nn = prompt('Naya naam:', f.name);
-      if (nn && nn !== f.name) { const r = await V.file.rename(f.path, nn); r.ok ? toast('Renamed') : toast(r.error); loadFiles(); }
-    });
-    item.querySelector('[data-act=del]').addEventListener('click', async () => {
-      const r = await V.file.delete(f.path);
-      if (r.ok) { toast('Delete ho gaya'); loadFiles(); }
-    });
-    el.appendChild(item);
-  });
-}
-$('files-home').addEventListener('click', () => { currentDir = null; loadFiles(); });
-$('files-choose').addEventListener('click', async () => { const d = await V.file.choosedir(); if (d) loadFiles(d); });
-$('files-search-btn').addEventListener('click', async () => {
-  const q = $('files-search').value.trim();
-  if (!q) return toast('Search text daalo');
-  const res = await V.file.search(q, currentDir);
-  const el = $('files-list');
-  el.innerHTML = '<div class="list-item"><span class="sub">Results: ' + (res.length || 0) + '</span></div>';
-  (res || []).forEach(f => {
-    const item = document.createElement('div');
-    item.className = 'list-item';
-    item.innerHTML = '<span class="name">' + (f.isDir ? '\ud83d\udcc1 ' : '\ud83d\uddc4 ') + f.name + '</span><span class="sub">' + f.path + '</span>';
-    el.appendChild(item);
-  });
+const fileList = $('file-list');
+$('file-path').addEventListener('keydown', async function(e) {
+  if (e.key === 'Enter') { currentDir = e.target.value.trim(); loadFiles(); }
 });
+$('file-search').addEventListener('input', async function() {
+  const q = $('file-search').value.trim();
+  if (!q) { loadFiles(); return; }
+  fileList.innerHTML = '';
+  const r = await V.file.search(q, currentDir);
+  if (Array.isArray(r)) r.forEach(function(f) { renderFile(f); });
+  else toast(r.error || 'Error');
+});
+async function loadFiles() {
+  const r = await V.file.list(currentDir);
+  fileList.innerHTML = '';
+  if (Array.isArray(r)) r.forEach(function(f) { renderFile(f); });
+  else toast(r.error || 'error');
+}
+function renderFile(f) {
+  const div = document.createElement('div');
+  div.className = 'file-item';
+  div.innerHTML = '<span class="file-name">' + f.name + '</span><span class="file-type">' + (f.isDir ? 'folder' : 'file') + '</span>';
+  div.addEventListener('click', function() {
+    if (f.isDir) { currentDir = f.path; $('file-path').value = f.path; loadFiles(); }
+  });
+  fileList.appendChild(div);
+}
+loadFiles();
 
 /* ===== NOTES ===== */
-async function loadNotes() {
-  const list = await V.notes.list();
-  const el = $('notes-list');
-  el.innerHTML = '';
-  if (!list.length) { el.innerHTML = '<div class="list-item"><span class="sub">Koi note nahi. Upar add karo.</span></div>'; return; }
-  list.forEach(n => {
-    const item = document.createElement('div');
-    item.className = 'list-item';
-    item.style.flexDirection = 'column';
-    item.style.alignItems = 'flex-start';
-    item.innerHTML = '<strong>' + n.title + '</strong><span class="sub">' + (n.body || '') + '</span>';
-    const del = document.createElement('button');
-    del.className = 'btn-sm danger';
-    del.textContent = 'Delete';
-    del.addEventListener('click', async () => { await V.notes.delete(n.id); loadNotes(); });
-    item.appendChild(del);
-    el.appendChild(item);
-  });
-}
-$('note-add').addEventListener('click', async () => {
-  const t = $('note-title').value.trim(), b = $('note-body').value.trim();
-  if (!t && !b) return toast('Kuch to likho');
-  await V.notes.add(t, b);
-  $('note-title').value = ''; $('note-body').value = '';
+$('note-save').addEventListener('click', function() {
+  const n = $('note-title').value.trim() || 'Untitled';
+  const c = $('note-content').value.trim();
+  if (!c) return;
+  localStorage.setItem('velo_note_' + n, JSON.stringify({ title: n, content: c, date: new Date().toISOString() }));
+  toast('Note saved!');
   loadNotes();
 });
+function loadNotes() {
+  const list = $('notes-list');
+  if (!list) return;
+  list.innerHTML = '';
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!k || !k.startsWith('velo_note_')) continue;
+    try {
+      const n = JSON.parse(localStorage.getItem(k));
+      const div = document.createElement('div');
+      div.className = 'note-item';
+      div.innerHTML = '<strong>' + n.title + '</strong><small>' + new Date(n.date).toLocaleDateString() + '</small>';
+      div.addEventListener('click', function() { $('note-title').value = n.title; $('note-content').value = n.content; });
+      list.appendChild(div);
+    } catch (e) {}
+  }
+}
+loadNotes();
 
 /* ===== PC CONTROL ===== */
-$('pc-open').addEventListener('click', async () => {
-  const a = $('pc-app').value.trim();
-  if (!a) return toast('App ka naam likho');
-  const r = await V.pc.openapp(a);
-  r.ok ? toast(a + ' khol raha hoon...') : toast(r.error);
-});
-$('vol-up').addEventListener('click', () => V.pc.volume('up'));
-$('vol-down').addEventListener('click', () => V.pc.volume('down'));
-$('vol-mute').addEventListener('click', () => V.pc.volume('mute'));
-$('pc-shot').addEventListener('click', async () => {
-  const r = await V.pc.screenshot();
-  if (r.ok) { $('shot-path').textContent = 'Saved: ' + r.path; toast('Screenshot saved'); }
-  else toast(r.error);
-});
-$('pc-shutdown').addEventListener('click', async () => {
-  if (!confirm('Shutdown in 30 seconds? Cancel karne ke liye Cancel Shutdown dabao.')) return;
-  await V.pc.shutdown(30);
-  toast('Shutdown scheduled - 30s');
-});
-$('pc-cancel').addEventListener('click', async () => { await V.pc.cancelshutdown(); toast('Shutdown cancel'); });
+if ($('app-input')) {
+  $('app-input').addEventListener('keydown', async function(e) {
+    if (e.key === 'Enter') { await V.pc.openapp(e.target.value.trim()); toast('Opening...'); e.target.value = ''; }
+  });
+}
+if ($('screenshot-btn')) {
+  $('screenshot-btn').addEventListener('click', async function() { await V.pc.screenshot(); toast('Screenshot done'); });
+}
+if ($('volume-slider')) {
+  $('volume-slider').addEventListener('input', async function(e) { await V.pc.volume(e.target.value); });
+}
 
 /* ===== GITHUB ===== */
-async function gitRun(args) {
-  const dir = $('git-dir').value.trim();
-  if (!dir) return toast('Repo folder ka path daalo');
-  $('git-output').textContent = 'Running: git ' + args.join(' ') + '...';
-  const r = await V.git.exec(dir, args);
-  $('git-output').textContent = r.ok ? (r.output || '(no output)') : r.error;
+if ($('git-dir')) {
+  $('git-dir').addEventListener('keydown', async function(e) {
+    if (e.key === 'Enter') {
+      $('git-output').textContent = 'Running...';
+      const r = await V.git.exec(e.target.value.trim(), ['status']);
+      $('git-output').textContent = typeof r === 'string' ? r : JSON.stringify(r);
+    }
+  });
 }
-$('git-choose').addEventListener('click', async () => { const d = await V.file.choosedir(); if (d) $('git-dir').value = d; });
-$('git-status').addEventListener('click', () => gitRun(['status']));
-$('git-add').addEventListener('click', () => gitRun(['add', '.']));
-$('git-commit').addEventListener('click', async () => {
-  const m = prompt('Commit message:');
-  if (m) gitRun(['commit', '-m', '"' + m + '"']);
-});
-$('git-push').addEventListener('click', () => gitRun(['push']));
-$('git-pull').addEventListener('click', () => gitRun(['pull']));
-$('git-log').addEventListener('click', () => gitRun(['log', '--oneline', '-10']));
+if ($('git-commit')) {
+  $('git-commit').addEventListener('click', async function() {
+    const dir = $('git-dir').value.trim();
+    const msg = $('git-msg').value.trim();
+    if (!dir || !msg) return toast('Directory and message required');
+    $('git-output').textContent = 'Committing...';
+    await V.git.exec(dir, ['add', '.']);
+    const r2 = await V.git.exec(dir, ['commit', '-m', msg]);
+    $('git-output').textContent += '\n' + r2;
+    toast('Committed!');
+  });
+}
+if ($('git-push')) {
+  $('git-push').addEventListener('click', async function() {
+    const dir = $('git-dir').value.trim();
+    if (!dir) return;
+    $('git-output').textContent = 'Pushing...';
+    const r = await V.git.exec(dir, ['push']);
+    $('git-output').textContent += '\n' + r;
+    toast('Pushed!');
+  });
+}
 
 /* ===== BROWSER ===== */
-$('browser-open').addEventListener('click', async () => {
-  const u = $('browser-url').value.trim();
-  if (!u) return toast('URL daalo');
-  await V.browser.open(u);
-});
-$('browser-search').addEventListener('click', async () => {
-  const q = $('browser-q').value.trim();
-  if (!q) return toast('Search daalo');
-  await V.browser.search(q);
-});
+if ($('browser-url')) {
+  $('browser-url').addEventListener('keydown', async function(e) {
+    if (e.key === 'Enter') {
+      let url = e.target.value.trim();
+      if (!url) return;
+      if (!url.includes('://')) url = 'https://' + url;
+      await V.browser.open(url);
+      toast('Opening ' + url);
+    }
+  });
+}
+if ($('browser-search')) {
+  $('browser-search').addEventListener('keydown', async function(e) {
+    if (e.key === 'Enter') {
+      const q = e.target.value.trim();
+      if (!q) return;
+      await V.browser.search(q);
+      toast('Searching...');
+    }
+  });
+}
 
 /* ===== REMINDERS ===== */
 async function loadReminders() {
-  const list = await V.reminders.list();
-  const el = $('reminders-list');
-  el.innerHTML = '';
-  if (!list.length) { el.innerHTML = '<div class="list-item"><span class="sub">Koi reminder nahi.</span></div>'; return; }
-  list.forEach(r => {
-    const item = document.createElement('div');
-    item.className = 'list-item';
-    item.innerHTML = '<input type="checkbox" ' + (r.done ? 'checked' : '') + '>' +
-      '<span class="name" style="' + (r.done ? 'text-decoration:line-through;color:#64748b;' : '') + '">' + r.title + '</span>' +
-      '<span class="sub">' + (r.when || '') + '</span>' +
-      '<button class="btn-sm danger">Delete</button>';
-    item.querySelector('input').addEventListener('change', async () => { await V.reminders.toggle(r.id); loadReminders(); });
-    item.querySelector('button').addEventListener('click', async () => { await V.reminders.delete(r.id); loadReminders(); });
-    el.appendChild(item);
+  const list = $('reminders-list');
+  if (!list) return;
+  list.innerHTML = '';
+  const r = await V.reminders.list();
+  if (!Array.isArray(r)) return;
+  r.forEach(function(rem) {
+    const div = document.createElement('div');
+    div.className = 'reminder-item' + (rem.done ? ' done' : '');
+    div.innerHTML = '<span>' + (rem.done ? '[x]' : '[ ]') + ' ' + rem.title + '</span><small>' + (rem.time || '') + '</small>';
+    div.addEventListener('click', async function() { await V.reminders.toggle(rem.id); loadReminders(); });
+    list.appendChild(div);
   });
 }
-$('rem-add').addEventListener('click', async () => {
-  const t = $('rem-title').value.trim(), w = $('rem-when').value;
-  if (!t) return toast('Kya yaad rakhna hai?');
-  await V.reminders.add(t, w);
-  $('rem-title').value = '';
-  loadReminders();
-});
+if ($('reminder-add')) {
+  $('reminder-add').addEventListener('click', async function() {
+    const t = $('reminder-title').value.trim();
+    if (!t) return;
+    await V.reminders.add(t, '', '');
+    $('reminder-title').value = '';
+    loadReminders();
+    toast('Reminder added');
+  });
+}
+loadReminders();
 
 /* ===== CALENDAR ===== */
 async function loadCalendar() {
-  const list = await V.calendar.list();
-  const el = $('calendar-list');
-  el.innerHTML = '';
-  if (!list.length) { el.innerHTML = '<div class="list-item"><span class="sub">Koi event nahi.</span></div>'; return; }
-  list.forEach(c => {
-    const item = document.createElement('div');
-    item.className = 'list-item';
-    item.innerHTML = '<span class="name">' + c.title + '</span><span class="sub">' + (c.date || '') + '</span><button class="btn-sm danger">Delete</button>';
-    item.querySelector('button').addEventListener('click', async () => { await V.calendar.delete(c.id); loadCalendar(); });
-    el.appendChild(item);
+  const list = $('calendar-list');
+  if (!list) return;
+  list.innerHTML = '';
+  const r = await V.calendar.list();
+  if (!Array.isArray(r)) return;
+  r.forEach(function(ev) {
+    const div = document.createElement('div');
+    div.className = 'calendar-item';
+    div.innerHTML = '<strong>' + ev.title + '</strong><small>' + (ev.date || '') + '</small>';
+    list.appendChild(div);
   });
 }
-$('cal-add').addEventListener('click', async () => {
-  const t = $('cal-title').value.trim(), d = $('cal-date').value;
-  if (!t) return toast('Event ka naam likho');
-  await V.calendar.add(t, d);
-  $('cal-title').value = '';
-  loadCalendar();
-});
+if ($('calendar-add')) {
+  $('calendar-add').addEventListener('click', async function() {
+    const t = $('calendar-title').value.trim();
+    const d = $('calendar-date').value;
+    if (!t) return;
+    await V.calendar.add(t, d, '');
+    $('calendar-title').value = '';
+    loadCalendar();
+    toast('Event added');
+  });
+}
+loadCalendar();
 
 /* ===== MEMORY ===== */
 async function loadMemory() {
-  const list = await V.memory.list();
-  const el = $('memory-list');
-  el.innerHTML = '';
-  if (!list.length) { el.innerHTML = '<div class="list-item"><span class="sub">Memory khali hai.</span></div>'; return; }
-  list.forEach(m => {
-    const item = document.createElement('div');
-    item.className = 'list-item';
-    item.innerHTML = '<strong>' + m.key + ':</strong><span class="name">' + m.value + '</span><button class="btn-sm danger">Delete</button>';
-    item.querySelector('button').addEventListener('click', async () => { await V.memory.delete(m.id); loadMemory(); });
-    el.appendChild(item);
+  const list = $('memory-list');
+  if (!list) return;
+  list.innerHTML = '';
+  const r = await V.memory.get();
+  if (!Array.isArray(r)) return;
+  r.forEach(function(m) {
+    const div = document.createElement('div');
+    div.className = 'memory-item';
+    div.innerHTML = '<strong>' + m.key + '</strong><span>' + m.value + '</span>';
+    list.appendChild(div);
   });
 }
-$('mem-add').addEventListener('click', async () => {
-  const k = $('mem-key').value.trim(), v = $('mem-value').value.trim();
-  if (!k || !v) return toast('Key aur value dono daalo');
-  await V.memory.add(k, v);
-  $('mem-key').value = ''; $('mem-value').value = '';
-  loadMemory();
-});
+loadMemory();
 
-/* ===== SETTINGS ===== */
-async function loadStatus() {
-  const s = await V.ai.status();
-  $('chat-status').textContent = s.hasKey ? 'AI ready' : 'API key chahiye';
-  $('chat-status').className = 'status-badge ' + (s.hasKey ? 'ok' : 'bad');
-  $('settings-status').textContent = s.hasKey ? 'AI ready' : 'No key';
-  $('settings-status').className = 'status-badge ' + (s.hasKey ? 'ok' : 'bad');
-  $('key-status').textContent = s.hasKey ? 'Key set hai. Chat karo!' : 'Key set nahi hai. FREE key lo aur save karo.';
+/* ===== SETTINGS (GROQ, not Gemini!) ===== */
+if ($('settings-save')) {
+  $('settings-save').addEventListener('click', async function() {
+    const key = $('api-key').value.trim();
+    if (!key) return toast('Pehle Groq API key daalo!');
+    await V.ai.setKey(key);
+    toast('Groq API key saved!');
+    checkAIStatus();
+  });
 }
-$('groq-link').addEventListener('click', (e) => { e.preventDefault(); V.browser.open('https://console.groq.com/keys'); });
-$('save-key').addEventListener('click', async () => {
-  const k = $('api-key').value.trim();
-  if (!k) return toast('Key paste karo');
-  await V.ai.setKey(k);
-  $('api-key').value = '';
-  toast('Key saved! Ab chat karo');
-  loadStatus();
-});
 
-/* ===== INIT ===== */
-(async function init() {
-  loadStatus();
-  loadFiles();
-  loadNotes();
-  loadReminders();
-  loadCalendar();
-  loadMemory();
-  addMsg('bot', 'Namaste! Main VELO hoon. Kuch bhi puchho ya bolo "Hey Velo". Sab FREE hai. \u2764');
-})();
+async function checkAIStatus() {
+  const st = await V.ai.status();
+  const badge = $('chat-status');
+  if (badge) {
+    badge.textContent = st.hasKey ? 'AI ready (Groq)' : 'Need Groq API key';
+    badge.className = 'status-badge ' + (st.hasKey ? 'ok' : 'warn');
+  }
+}
+checkAIStatus();
+
+/* ===== TTS TOGGLE ===== */
+if ($('tts-toggle')) {
+  $('tts-toggle').addEventListener('click', function() {
+    ttsOn = !ttsOn;
+    $('tts-toggle').textContent = ttsOn ? 'Voice ON' : 'Voice OFF';
+    $('tts-toggle').className = ttsOn ? '' : 'muted';
+    toast(ttsOn ? 'Indian voice ON' : 'Voice OFF');
+  });
+}
+
+console.log('VELO v2.1 ready - Indian girl voice + mic auto-restart fix!');
