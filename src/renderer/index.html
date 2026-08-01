@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'">
+  <title>VELO - Personal AI Assistant</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo"><span class="logo-icon">◆</span> VELO</div>
+      <nav>
+        <button class="nav-btn active" data-view="chat">💬 Chat</button>
+        <button class="nav-btn" data-view="files">📁 Files</button>
+        <button class="nav-btn" data-view="notes">📝 Notes</button>
+        <button class="nav-btn" data-view="pc">🖥️ PC Control</button>
+        <button class="nav-btn" data-view="git">🐙 GitHub</button>
+        <button class="nav-btn" data-view="memory">💾 Memory</button>
+        <button class="nav-btn" data-view="settings">⚙️ Settings</button>
+      </nav>
+      <div class="sidebar-footer">v1.0 · Free · Local</div>
+    </aside>
+
+    <!-- Main area -->
+    <main class="main">
+      <!-- CHAT VIEW -->
+      <section id="view-chat" class="view active">
+        <div class="chat-header">
+          <h2>Chat with VELO</h2>
+          <span id="chat-status" class="status-badge">checking key...</span>
+        </div>
+        <div id="messages" class="messages"></div>
+        <div class="chat-input-wrap">
+          <textarea id="chat-input" rows="2" placeholder="Ask VELO anything... (e.g. 'open notepad', 'find my resume', 'take a screenshot')"></textarea>
+          <button id="send-btn">Send</button>
+        </div>
+      </section>
+
+      <!-- FILES VIEW -->
+      <section id="view-files" class="view">
+        <div class="view-header">
+          <h2>File Manager</h2>
+          <div class="row">
+            <button id="pick-dir" class="btn">📂 Choose Folder</button>
+            <input id="file-search" placeholder="Search files...">
+          </div>
+        </div>
+        <div id="file-current" class="breadcrumb">Home</div>
+        <ul id="file-list" class="file-list"></ul>
+      </section>
+
+      <!-- NOTES VIEW -->
+      <section id="view-notes" class="view">
+        <div class="view-header"><h2>Notes</h2></div>
+        <div class="row">
+          <input id="note-title" placeholder="Note title">
+          <button id="note-save" class="btn">Save Note</button>
+        </div>
+        <textarea id="note-content" placeholder="Write your note here..."></textarea>
+        <div id="note-list" class="note-list"></div>
+      </section>
+
+      <!-- PC VIEW -->
+      <section id="view-pc" class="view">
+        <div class="view-header"><h2>PC Control</h2></div>
+        <div class="pc-grid">
+          <div class="pc-card"><label>Open App</label><input id="pc-app" placeholder="e.g. notepad"><button id="pc-open" class="btn">Open</button></div>
+          <div class="pc-card"><button id="pc-shot" class="btn big">📸 Take Screenshot</button></div>
+          <div class="pc-card"><button id="pc-shutdown" class="btn big danger">⏻ Shut Down PC</button></div>
+        </div>
+        <div id="pc-result" class="result"></div>
+      </section>
+
+      <!-- GIT VIEW -->
+      <section id="view-git" class="view">
+        <div class="view-header"><h2>GitHub (git CLI)</h2></div>
+        <div class="row">
+          <input id="git-dir" placeholder="Repo folder path">
+          <button id="git-browse" class="btn">Browse</button>
+        </div>
+        <div class="row">
+          <input id="git-cmd" placeholder="e.g. status, add ., commit -m 'msg', push">
+          <button id="git-run" class="btn">Run</button>
+        </div>
+        <pre id="git-output" class="output"></pre>
+      </section>
+
+      <!-- MEMORY VIEW -->
+      <section id="view-memory" class="view">
+        <div class="view-header"><h2>Remembered Preferences</h2></div>
+        <div class="row">
+          <input id="mem-key" placeholder="Key (e.g. favorite_color)">
+          <input id="mem-val" placeholder="Value (e.g. blue)">
+          <button id="mem-add" class="btn">Remember</button>
+        </div>
+        <ul id="mem-list" class="mem-list"></ul>
+      </section>
+
+      <!-- SETTINGS VIEW -->
+      <section id="view-settings" class="view">
+        <div class="view-header"><h2>Settings</h2></div>
+        <div class="settings-card">
+          <h3>🤖 Gemini API Key (free)</h3>
+          <p>Get your free key from <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a></p>
+          <div class="row">
+            <input id="api-key" type="password" placeholder="Paste your Gemini API key">
+            <button id="save-key" class="btn">Save Key</button>
+          </div>
+          <p id="key-status"></p>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
