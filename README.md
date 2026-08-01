@@ -1,26 +1,37 @@
-# VELO - Personal AI Desktop Assistant (v2.0)
+# VELO v2.2 - Personal AI Desktop Assistant
 
-Ek hi app me: Chat + Voice + Files + Notes + PC Control + GitHub + Browser + Reminders + Calendar + Memory.
-100% FREE - Groq (Llama 3.1) powered, no credit card, no billing.
+Pure JavaScript - NO native compilation, NO Visual Studio, NO TypeScript!
 
-## Install (Windows)
-1. Node.js install karo: https://nodejs.org (LTS)
-2. Ye repo ZIP download karo aur extract karo
-3. `setup.bat` double-click karo
-4. Settings me FREE Groq key daalo: https://console.groq.com/keys
-5. Done! Chat karo ya "Hey Velo" bolo.
+## Quick Start
+1. Extract this folder
+2. Double-click `setup.bat`
+3. Get free API key from https://console.groq.com/keys
+4. Paste in Settings -> Save
+5. Chat or say "Hey Velo"!
+
+## Requirements
+- Windows/macOS/Linux
+- Node.js v16+ (install from https://nodejs.org)
+- Internet connection (for AI + voice TTS)
+- FREE Groq API key (no credit card needed)
 
 ## Features
-- Chat: AI (Groq, free) - Hindi/English/Hinglish
-- Voice: "Hey Velo" wake word + push-to-talk + voice replies
-- Files: browse, search, rename, delete, open
-- Notes: quick notes
-- PC Control: open apps, volume, screenshot, shutdown
-- GitHub: status, add, commit, push, pull, log
-- Browser: open site, google search
-- Reminders & Calendar: local storage
-- Memory: cheezein yaad rakhna
+- AI Chat (Groq llama-3.1-8b-instant, FREE)
+- Voice Assistant (Indian accent, "Hey Velo" wake word)
+- File Manager (browse, search, open, delete)
+- Notes
+- PC Control (open apps, volume, shutdown)
+- GitHub integration
+- Browser (open URLs, Google search)
+- Reminders & Calendar
+- Memory system
 
-## Dev
-- Stack: Electron + TypeScript + Groq API (fetch)
-- Build: `npm run build` | Run: `npm start`
+## Voice
+- Click mic button or press Ctrl+M
+- Say "Hey Velo [your command]" to wake
+- Auto-restarts if mic drops
+- Indian female voice accent
+
+## About
+Built by Jaydev - Pure JavaScript, fully free and open source.
+Uses Groq API (free tier) and Google Translate TTS (free).
