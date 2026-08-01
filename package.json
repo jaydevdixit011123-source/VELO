@@ -1,17 +1,17 @@
 {
   "name": "velo-desktop",
-  "version": "2.0.0",
-  "description": "VELO - Personal AI Desktop Assistant (Free, Groq powered)",
-  "main": "dist/main/index.js",
+  "version": "2.2.0",
+  "description": "VELO - Personal AI Desktop Assistant (PURE JS, no native modules)",
+  "main": "src/main.js",
   "scripts": {
-    "start": "npx electron .",
-    "build": "npx tsc"
+    "start": "electron ."
   },
   "author": "Jaydev",
   "license": "MIT",
-  "dependencies": {},
   "devDependencies": {
-    "electron": "^31.0.2",
-    "typescript": "^5.4.5"
+    "electron": "^33.0.0"
+  },
+  "dependencies": {
+    "groq-sdk": "^0.8.0"
   }
 }
