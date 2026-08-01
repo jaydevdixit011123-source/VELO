@@ -1,7 +1,7 @@
 {
   "name": "velo-desktop",
-  "version": "1.0.0",
-  "description": "VELO - Personal AI Desktop Assistant (free, Gemini powered)",
+  "version": "1.1.0",
+  "description": "VELO - Personal AI Desktop Assistant (free, Gemini powered, zero native deps)",
   "main": "dist/main/index.js",
   "scripts": {
     "start": "electron .",
@@ -15,14 +15,10 @@
   "license": "MIT",
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
-    "better-sqlite3": "^11.3.0",
-    "electron-store": "^8.2.0",
-    "shelljs": "^0.8.5"
+    "electron-store": "^8.2.0"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^20.14.0",
-    "@types/shelljs": "^0.8.15",
     "electron": "^31.0.2",
     "electron-builder": "^24.13.3",
     "typescript": "^5.4.5"
@@ -30,13 +26,9 @@
   "build": {
     "appId": "com.jaydev.velo",
     "productName": "VELO",
-    "directories": {
-      "output": "release"
-    },
+    "directories": { "output": "release" },
     "files": ["dist/**/*", "package.json"],
-    "win": {
-      "target": ["nsis"]
-    },
+    "win": { "target": ["nsis"] },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
