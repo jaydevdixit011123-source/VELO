@@ -1,17 +1,16 @@
 {
   "name": "velo-desktop",
-  "version": "2.2.0",
-  "description": "VELO - Personal AI Desktop Assistant (PURE JS, no native modules)",
-  "main": "src/main.js",
+  "version": "3.0.0",
+  "description": "VELO - Free, customisable, Jarvis-style personal AI desktop assistant. Pure JS, no native modules.",
+  "main": "src/main/main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "setup": "node setup.js"
   },
   "author": "Jaydev",
   "license": "MIT",
   "devDependencies": {
     "electron": "^33.0.0"
   },
-  "dependencies": {
-    "groq-sdk": "^0.8.0"
-  }
+  "dependencies": {}
 }

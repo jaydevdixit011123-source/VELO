@@ -1,7 +1,5 @@
 node_modules/
-dist/
-release/
-*.log
+velo-data/
+config.json
 .env
-.DS_Store
-velo.db
+*.log
