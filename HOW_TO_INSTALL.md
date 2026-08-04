@@ -1,39 +1,42 @@
-# 🚀 VELO Install Guide (Super Easy - Windows)
+# 📥 How to Install VELO (Step-by-Step)
 
-Follow these steps and VELO will run on your computer. No coding needed.
+## Method 1 - Windows (Easiest)
 
-## What you need first (just 3 free things)
-1. **Node.js** - https://nodejs.org (download LTS, install it)
-2. **Git** - https://git-scm.com (click next-next-finish)
-3. **Gemini API key** (free) - https://aistudio.google.com/app/apikey
+1. **Get the files**
+   - Download/Extract the VELO folder to your PC (anywhere, e.g. `C:\VELO`).
 
-## Step-by-Step
+2. **Install Node.js** (only once)
+   - Go to **https://nodejs.org** → download **LTS** → install (click Next, Next, Finish).
+   - *If you already have Node, skip this.*
 
-### Step 1: Get the code
-- Click **Code** (green button) on the repo page → **Download ZIP**
-- OR open Command Prompt and run:
-  ```
-  git clone https://github.com/jaydevdixit011123-source/VELO.git
-  cd VELO
-  ```
+3. **Run setup**
+   - Double-click **`setup.bat`** inside the VELO folder.
+   - It will automatically install everything (takes ~1 min).
+   - You'll see `Setup complete!` when done.
 
-### Step 2: One-click install
-- Open the **VELO** folder
-- **Double-click `setup.bat`**
-- It installs everything automatically and opens VELO
+4. **Start VELO**
+   - Double-click **`start.bat`**.
+   - The VELO window opens. 🎉
 
-### Step 3: Add your AI key (once)
-- Click **⚙️ Settings** in VELO
-- Paste your free Gemini API key → **Save Key**
-- Done! Start chatting. 🎉
+## Method 2 - From GitHub (for developers)
+```bash
+git clone https://github.com/jaydevdixit011123-source/VELO.git
+cd VELO
+npm install
+npm start
+```
 
-## Troubleshooting
-- **Node not found error** → Install Node.js from nodejs.org first
-- **Can't connect to AI** → Make sure you saved your Gemini key in Settings
-- **Want it to also work offline?** → Install Ollama (ollama.ai) and VELO can use it later
+## 🎙️ (Optional) Add FREE AI
+- Open VELO → **Settings**
+- Get a free key: **https://console.groq.com/keys**
+- Paste & **Save**. Done!
 
-## Next features coming
-- Voice assistant
-- Plugin system
-- Calendar + reminders with notifications
-- One-click .exe installer (no Node needed)
+## ❓ Troubleshooting
+| Problem | Fix |
+|---------|-----|
+| `node is not recognized` | Install Node.js from nodejs.org |
+| `Setup failed` | Check internet, re-run setup.bat |
+| Chat replies are basic | Add your free Groq key in Settings |
+| Window won't open | Re-run `setup.bat` to reinstall deps |
+
+Still stuck? Just re-run `setup.bat` - it's safe to run again.
