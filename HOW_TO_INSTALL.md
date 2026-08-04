@@ -1,42 +1,71 @@
 # 📥 How to Install VELO (Step-by-Step)
 
-## Method 1 — Windows (Easiest)
+## Windows
 
-1. **Get the files**
-   - Download/Extract the VELO folder to your PC (anywhere, e.g. `C:\VELO`).
+### Step 1: Install Node.js (one time)
+- Go to **[nodejs.org](https://nodejs.org)**
+- Download the **LTS** version
+- Install it (keep all default settings, just click Next)
+- Verify: open Command Prompt and type `node -v` → should show v16+
 
-2. **Install Node.js** (only once)
-   - Go to **https://nodejs.org** → download **LTS** → install (click Next, Next, Finish).
-   - *If you already have Node, skip this.*
+### Step 2: Download VELO
+- **Clone the repo** or download as ZIP
+- Extract to any folder (e.g., `Desktop/VELO`)
 
-3. **Run setup**
-   - Double-click **`setup.bat`** inside the VELO folder.
-   - It will automatically install everything (takes ~1 min).
-   - You'll see `Setup complete!` when done.
+### Step 3: Run Setup
+- **Double-click `setup.bat`**
+- It will:
+  1. Check if Node.js is installed
+  2. Run `npm install` to get Electron
+  3. Confirm everything is ready
 
-4. **Start VELO**
-   - Double-click **`start.bat`**.
-   - The VELO window opens. 🎉
+### Step 4: Launch
+- **Double-click `start.bat`**
+- VELO opens in a beautiful window 🎉
 
-## Method 2 — From GitHub (for developers)
+---
+
+## macOS
+
 ```bash
-git clone https://github.com/jaydevdixit011123-source/VELO.git
+# Install Node.js first from nodejs.org, then:
 cd VELO
 npm install
-npm start
+npx electron .
 ```
 
-## 🎙️ (Optional) Add FREE AI
-- Open VELO → **Settings**
-- Get a free key: **https://console.groq.com/keys**
-- Paste & **Save**. Done!
+## Linux
 
-## ❓ Troubleshooting
-| Problem | Fix |
-|---------|-----|
-| `node is not recognized` | Install Node.js from nodejs.org |
-| `Setup failed` | Check internet, re-run setup.bat |
-| Chat replies are basic | Add your free Groq key in Settings |
-| Window won't open | Re-run `setup.bat` to reinstall deps |
+```bash
+# Install Node.js, then:
+cd VELO
+npm install
+npx electron .
+```
 
-Still stuck? Just re-run `setup.bat` — it's safe to run again.
+---
+
+## Optional: Free Groq API Key for Full AI
+
+1. Go to **[console.groq.com/keys](https://console.groq.com/keys)**
+2. Sign in with Google/GitHub (free, no card needed)
+3. Click **Create API Key** → copy the key
+4. Open VELO → **Settings** tab → paste the key → click **Save Key**
+5. Done! VELO now uses the full AI model.
+
+> Without a key, VELO still works in **Local Mode** with built-in smart replies.
+
+---
+
+## Troubleshooting
+
+| Issue | Fix |
+|-------|-----|
+| "Node.js not found" | Install Node.js from [nodejs.org](https://nodejs.org) |
+| "npm install failed" | Check internet connection, try again |
+| "VELO won't start" | Make sure you ran `setup.bat` first |
+| "Groq API error" | Check your key is correct and active at console.groq.com |
+
+---
+
+Need more help? Open an issue on the GitHub repo!

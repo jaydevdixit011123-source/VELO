@@ -30,5 +30,8 @@ contextBridge.exposeInMainWorld('velo', {
     info: () => ipcRenderer.invoke('pc:systeminfo')
   },
   browser: { open: (u) => ipcRenderer.invoke('browser:open', u) },
-  clipboard: { write: (t) => ipcRenderer.invoke('clipboard:write', t), read: () => ipcRenderer.invoke('clipboard:read') }
+  clipboard: {
+    write: (t) => ipcRenderer.invoke('clipboard:write', t),
+    read: () => ipcRenderer.invoke('clipboard:read')
+  }
 });

@@ -2,73 +2,90 @@
 
 **VELO** is a fast, beautiful, fully free AI assistant that lives on your PC. Think of it as your own **Jarvis** — private, customisable, and completely yours.
 
-- 🔒 **100% Local & Private** — your data never leaves your machine
+- 🔒 **100% Local and Private** — your data never leaves your machine
 - 💸 **100% Free** — works in Local Mode with no key, or unlock full AI with a **FREE** Groq key
 - 🎨 **Beautiful UI** — modern glass dark theme, smooth animations, multi-theme
 - ⚙️ **Fully Customisable** — model, language, theme, wake word, and more
 
 ---
 
-## ✨ Features
+## ✨ What VELO Can Do
 
-| Area | What it does |
-|------|--------------|
-| 🧠 **AI Chat** | Natural chat in English, Hindi & Hinglish |
-| 📝 **Notes** | Create, edit & delete notes (local) |
-| ⏰ **Tasks** | To-do list & reminders |
-| 🧠 **Memory** | Long-term memory, kept locally |
-| 💻 **PC Control** | Open apps, lock, sleep, restart, volume |
-| 🖥️ **Terminal** | Run commands, view output |
-| 🌐 **Browser** | Open websites / Google search |
-| ⚙️ **Settings** | Model, language, theme, wake word, API key |
+| Area | Features |
+|------|----------|
+| 🧠 **AI Chat** | Natural conversation in English, Hindi and Hinglish |
+| 📝 **Notes** | Create, edit and delete notes stored locally |
+| ✅ **Tasks** | To-do list with toggles |
+| 🧠 **Memory** | VELO remembers things you tell it, stored locally |
+| 💻 **PC Control** | Open apps, lock PC, sleep, restart, shutdown, volume |
+| 🖥️ **Terminal** | Run commands and see output |
+| 🌐 **Browser** | Open websites or Google search |
+| ⚙️ **Settings** | Model, language, theme (3 styles), wake word, API key |
 
 ---
 
 ## 🚀 Quick Install (2 minutes)
 
 ### Windows
-1. **Download / clone** this folder
-2. **Double-click** `setup.bat` — it checks Node, installs dependencies automatically
-3. **Double-click** `start.bat` to launch VELO 🎉
+1. **Download / clone** this repo
+2. **Double-click** `setup.bat` — it checks Node.js and installs everything
+3. **Double-click** `start.bat` — VELO launches! 🎉
 
 ### Requirements
-- **Node.js** v16+ (free, from [nodejs.org](https://nodejs.org))
+- **Node.js v16+** — free from [nodejs.org](https://nodejs.org)
 - **Windows / macOS / Linux**
-- Internet only needed for full AI chat (Local Mode works offline)
-
-> ⚠️ First run needs Node.js. If it's missing, `setup.bat` will guide you.
+- Internet only needed for full AI (Local Mode works offline)
 
 ---
 
 ## 🔑 Unlock Full AI (FREE, 2 min)
-VELO works in **Local Mode** out of the box. To unlock the powerful AI model:
 
-1. Go to **https://console.groq.com/keys** and login (free, no card)
-2. Click **Create API Key** → copy it (starts with `gsk_`)
-3. Open VELO → **Settings** → paste key → **Save Key** ✅
+VELO works in **Local Mode** out of the box. To unlock the powerful AI:
 
-That's it — now you get a fast, free AI model. No subscription, no card, ever.
+1. Go to **[console.groq.com/keys](https://console.groq.com/keys)** and sign in (free, no credit card)
+2. Click **Create API Key** → copy the key (it starts with `gsk_`)
+3. Open VELO → **Settings** tab → paste the key → click **Save Key** ✅
+
+Now you get a blazing-fast, free AI model. No subscription, no limits.
 
 ---
 
 ## 🎨 Customisation
-Open **Settings** inside VELO to change:
-- **AI Model** — Llama 3.3 70B, Llama 3.1 8B, Gemma 2
-- **Reply Language** — Hinglish / Hindi / English
-- **Theme** — Dark / Light / Ocean
-- **Wake Word** (for voice builds)
+
+| Setting | Options |
+|---------|--------|
+| **Model** | llama-3.3-70b, mixtral-8x7b, gemma2-9b, llama-3.1-8b |
+| **Language** | English, Hindi, Hinglish |
+| **Theme** | Dark (default), Light, Ocean |
+| **Wake Word** | Any phrase (default: "hey velo") |
 
 ---
 
-## 🗺️ Roadmap
-- 🎙️ Voice input (Wake word "Hey Velo") with Indian accent
-- 📅 Calendar & reminders with notifications
-- 🔔 Auto reminders & scheduled tasks
-- 🌐 Web search & email integration (optional)
+## 📁 Project Structure
+
+```
+VELO/
+├── package.json          # Electron app (NO native deps)
+├── setup.bat             # One-click install
+├── start.bat             # Launch VELO
+├── src/
+│   ├── main/main.js      # Electron main process (all logic)
+│   └── preload.js        # Secure bridge to UI
+└── renderer/
+    ├── index.html        # Beautiful UI
+    ├── styles.css        # 3 themes
+    └── renderer.js       # Frontend logic
+```
 
 ---
 
-## 📄 License
-MIT — free to use, modify & share.
+## 🛠️ Tech Stack
 
-Built with ❤️ by **Jaydev** — Pure JavaScript, no native modules, fully open source.
+- **Electron** — desktop app shell
+- **Groq API** — free, ultra-fast LLM inference
+- **Pure JavaScript** — no TypeScript, no build steps, no native modules
+- **Local JSON storage** — all data stays on your machine
+
+---
+
+Made with ❤️ by Jaydev | MIT License
