@@ -4,7 +4,8 @@
   "description": "VELO - Free, customisable, Jarvis-style personal AI desktop assistant. Pure JS, no native modules.",
   "main": "src/main/main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "setup": "node setup.js"
   },
   "author": "Jaydev",
   "license": "MIT",

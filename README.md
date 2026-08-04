@@ -1,11 +1,11 @@
-# 🚀 VELO v3.0 - Your Free, Personal AI Desktop Assistant
+# 🚀 VELO v3.0 — Your Free, Personal AI Desktop Assistant
 
-**VELO** is a fast, beautiful, fully free AI assistant that lives on your PC. Think of it as your own **Jarvis** - private, customisable, and completely yours.
+**VELO** is a fast, beautiful, fully free AI assistant that lives on your PC. Think of it as your own **Jarvis** — private, customisable, and completely yours.
 
-- 🔒 **100% Local & Private** - your data never leaves your machine
-- 💸 **100% Free** - works in Local Mode with no key, or unlock full AI with a **FREE** Groq key
-- 🎨 **Beautiful UI** - modern glass dark theme, smooth animations, multi-theme
-- ⚙️ **Fully Customisable** - model, language, theme, wake word, and more
+- 🔒 **100% Local & Private** — your data never leaves your machine
+- 💸 **100% Free** — works in Local Mode with no key, or unlock full AI with a **FREE** Groq key
+- 🎨 **Beautiful UI** — modern glass dark theme, smooth animations, multi-theme
+- ⚙️ **Fully Customisable** — model, language, theme, wake word, and more
 
 ---
 
@@ -28,7 +28,7 @@
 
 ### Windows
 1. **Download / clone** this folder
-2. **Double-click** `setup.bat` - it checks Node, installs dependencies automatically
+2. **Double-click** `setup.bat` — it checks Node, installs dependencies automatically
 3. **Double-click** `start.bat` to launch VELO 🎉
 
 ### Requirements
@@ -47,15 +47,15 @@ VELO works in **Local Mode** out of the box. To unlock the powerful AI model:
 2. Click **Create API Key** → copy it (starts with `gsk_`)
 3. Open VELO → **Settings** → paste key → **Save Key** ✅
 
-That's it - now you get a fast, free AI model. No subscription, no card, ever.
+That's it — now you get a fast, free AI model. No subscription, no card, ever.
 
 ---
 
 ## 🎨 Customisation
 Open **Settings** inside VELO to change:
-- **AI Model** - Llama 3.3 70B, Llama 3.1 8B, Gemma 2
-- **Reply Language** - Hinglish / Hindi / English
-- **Theme** - Dark / Light / Ocean
+- **AI Model** — Llama 3.3 70B, Llama 3.1 8B, Gemma 2
+- **Reply Language** — Hinglish / Hindi / English
+- **Theme** — Dark / Light / Ocean
 - **Wake Word** (for voice builds)
 
 ---
@@ -69,6 +69,6 @@ Open **Settings** inside VELO to change:
 ---
 
 ## 📄 License
-MIT - free to use, modify & share.
+MIT — free to use, modify & share.
 
-Built with ❤️ by **Jaydev** - Pure JavaScript, no native modules, fully open source.
+Built with ❤️ by **Jaydev** — Pure JavaScript, no native modules, fully open source.

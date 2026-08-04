@@ -1,6 +1,6 @@
 # 📥 How to Install VELO (Step-by-Step)
 
-## Method 1 - Windows (Easiest)
+## Method 1 — Windows (Easiest)
 
 1. **Get the files**
    - Download/Extract the VELO folder to your PC (anywhere, e.g. `C:\VELO`).
@@ -18,7 +18,7 @@
    - Double-click **`start.bat`**.
    - The VELO window opens. 🎉
 
-## Method 2 - From GitHub (for developers)
+## Method 2 — From GitHub (for developers)
 ```bash
 git clone https://github.com/jaydevdixit011123-source/VELO.git
 cd VELO
@@ -39,4 +39,4 @@ npm start
 | Chat replies are basic | Add your free Groq key in Settings |
 | Window won't open | Re-run `setup.bat` to reinstall deps |
 
-Still stuck? Just re-run `setup.bat` - it's safe to run again.
+Still stuck? Just re-run `setup.bat` — it's safe to run again.
