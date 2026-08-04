@@ -1,4 +1,4 @@
-# 🚀 VELO v3.0 — Your Free, Personal AI Desktop Assistant
+# 🚀 VELO v3.1 — Your Free, Personal AI Desktop Assistant
 
 **VELO** is a fast, beautiful, fully free AI assistant that lives on your PC. Think of it as your own **Jarvis** — private, customisable, and completely yours.
 
