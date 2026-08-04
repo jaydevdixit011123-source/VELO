@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VELO · Personal AI Assistant</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';">
+<title>VELO - Personal AI Assistant</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -18,145 +19,126 @@
         </div>
       </div>
       <nav class="nav">
-        <button class="nav-item active" data-view="chat"><span class="ico">✦</span> Chat</button>
-        <button class="nav-item" data-view="notes"><span class="ico">📝</span> Notes</button>
-        <button class="nav-item" data-view="tasks"><span class="ico">⏰</span> Tasks</button>
-        <button class="nav-item" data-view="memory"><span class="ico">🧠</span> Memory</button>
-        <button class="nav-item" data-view="pc"><span class="ico">💻</span> PC</button>
-        <button class="nav-item" data-view="settings"><span class="ico">⚙️</span> Settings</button>
+        <button class="nav-item active" data-view="chat">✦ Chat</button>
+        <button class="nav-item" data-view="notes">📝 Notes</button>
+        <button class="nav-item" data-view="tasks">✅ Tasks</button>
+        <button class="nav-item" data-view="memory">🧠 Memory</button>
+        <button class="nav-item" data-view="pc">💻 PC</button>
+        <button class="nav-item" data-view="settings">⚙️ Settings</button>
       </nav>
       <div class="status-card">
         <div class="status-dot" id="aiStatusDot"></div>
         <div>
           <strong id="aiStatusText">Local Mode</strong>
-          <span id="aiStatusSub">Free, no key needed</span>
+          <span id="aiStatusSub">Free — no key needed</span>
         </div>
       </div>
     </aside>
 
-    <!-- Main content -->
+    <!-- Main -->
     <main class="main">
-      <!-- CHAT VIEW -->
+      <!-- CHAT -->
       <section class="view active" id="view-chat">
         <div class="chat-header">
           <h2>Chat <span class="badge" id="chatMode">OFFLINE</span></h2>
-          <div class="quick-actions">
-            <button class="chip" data-ask="open notepad">📄 Open Notepad</button>
+          <div class="chips">
+            <button class="chip" data-ask="open notepad">📄 Notepad</button>
             <button class="chip" data-ask="show my notes">📝 My Notes</button>
-            <button class="chip" data-ask="tell me a productivity tip">✨ Tip</button>
+            <button class="chip" data-ask="open chrome">🌐 Chrome</button>
             <button class="chip" data-ask="what can you do">❓ Help</button>
           </div>
         </div>
-        <div class="chat-body" id="chatBody">
-          <div class="welcome">
-            <div class="welcome-orb">V</div>
-            <h2>Hey Jaydev 👋</h2>
-            <p>I'm <strong>VELO</strong> — your free, private, customisable AI assistant.</p>
-            <p class="hint">Ask me anything or try a quick action above.</p>
-          </div>
-        </div>
+        <div class="chat-body scrollbar" id="chatBody"></div>
         <div class="chat-input-bar">
-          <button class="mic-btn" id="micBtn" title="Not available in this build">🎙️</button>
-          <input type="text" id="chatInput" placeholder="Type a message...  (try 'create a note')" autocomplete="off">
-          <button class="send-btn" id="sendBtn">➤</button>
+          <textarea id="chatInput" placeholder="Type or speak to VELO..." rows="1" autofocus></textarea>
+          <button class="btn-icon" id="micBtn" title="Voice">🎤</button>
+          <button class="btn-icon" id="sendBtn" title="Send">➤</button>
         </div>
       </section>
 
-      <!-- NOTES VIEW -->
+      <!-- NOTES -->
       <section class="view" id="view-notes">
         <div class="view-header">
           <h2>📝 Notes</h2>
-          <button class="primary-btn" id="addNoteBtn">+ New Note</button>
+          <button class="btn btn-accent" id="addNoteBtn">+ New Note</button>
         </div>
-        <div class="notes-grid" id="notesGrid"></div>
-        <div class="editor-card hidden" id="noteEditor">
-          <input id="noteTitle" placeholder="Note title">
-          <textarea id="noteBody" placeholder="Write your note here..."></textarea>
-          <div class="editor-actions">
-            <button class="primary-btn" id="saveNoteBtn">Save</button>
-            <button class="ghost-btn" id="cancelNoteBtn">Cancel</button>
-          </div>
-        </div>
+        <div class="notes-grid scrollbar" id="notesGrid"></div>
       </section>
 
-      <!-- TASKS VIEW -->
+      <!-- TASKS -->
       <section class="view" id="view-tasks">
         <div class="view-header">
-          <h2>⏰ Tasks &amp; Reminders</h2>
-          <div class="add-task-row">
-            <input id="taskText" placeholder="Task / reminder text">
-            <button class="primary-btn" id="addTaskBtn">Add</button>
+          <h2>✅ Tasks</h2>
+          <div class="task-add-row">
+            <input id="taskText" placeholder="Add a new task..." />
+            <button class="btn btn-accent" id="addTaskBtn">Add</button>
           </div>
         </div>
-        <ul class="task-list" id="taskList"></ul>
+        <div class="task-list scrollbar" id="taskList"></div>
       </section>
 
-      <!-- MEMORY VIEW -->
+      <!-- MEMORY -->
       <section class="view" id="view-memory">
         <div class="view-header">
           <h2>🧠 Memory</h2>
-          <button class="ghost-btn danger" id="clearMemBtn">Clear All</button>
+          <button class="btn btn-danger" id="clearMemBtn">Clear All</button>
         </div>
-        <p class="muted">Things I remember about you (kept 100% local on your device).</p>
-        <ul class="mem-list" id="memList"></ul>
+        <div class="mem-list scrollbar" id="memList"></div>
       </section>
 
-      <!-- PC VIEW -->
+      <!-- PC CONTROL -->
       <section class="view" id="view-pc">
-        <div class="view-header"><h2>💻 PC Assistant</h2></div>
+        <div class="view-header"><h2>💻 PC Control</h2></div>
         <div class="pc-grid">
-          <div class="pc-card" data-pc="open" data-val="notepad">📄 Notepad</div>
-          <div class="pc-card" data-pc="open" data-val="chrome">🌐 Chrome</div>
-          <div class="pc-card" data-pc="open" data-val="vscode">⌨️ VS Code</div>
-          <div class="pc-card" data-pc="open" data-val="calculator">🧮 Calculator</div>
-          <div class="pc-card" data-pc="open" data-val="explorer">📁 Explorer</div>
-          <div class="pc-card" data-pc="open" data-val="cmd">🖥️ CMD</div>
-          <div class="pc-card" data-pc="action" data-val="lock">🔒 Lock</div>
-          <div class="pc-card" data-pc="action" data-val="volup">🔊 Vol Up</div>
-          <div class="pc-card" data-pc="action" data-val="voldown">🔉 Vol Down</div>
-          <div class="pc-card" data-pc="run" data-val="start msedge">🌐 Edge</div>
-          <div class="pc-card" data-pc="action" data-val="sleep">😴 Sleep</div>
-          <div class="pc-card" data-pc="action" data-val="restart">🔄 Restart</div>
+          <button class="pc-card" data-pc="open notepad">📄 Notepad</button>
+          <button class="pc-card" data-pc="open chrome">🌐 Chrome</button>
+          <button class="pc-card" data-pc="open vscode">💻 VS Code</button>
+          <button class="pc-card" data-pc="open cmd">⬛ Terminal</button>
+          <button class="pc-card" data-pc="open explorer">📁 Explorer</button>
+          <button class="pc-card" data-pc="open calculator">🔢 Calculator</button>
+          <button class="pc-card danger" data-pc="shutdown">⏻ Shutdown</button>
+          <button class="pc-card danger" data-pc="restart">🔄 Restart</button>
+          <button class="pc-card" data-pc="sleep">😴 Sleep</button>
+          <button class="pc-card" data-pc="lock">🔒 Lock</button>
         </div>
-        <div class="pc-terminal">
-          <label>Run any command</label>
+        <div class="terminal-box">
+          <h3>Terminal</h3>
           <div class="term-row">
-            <input id="pcCmd" placeholder="e.g. dir  /  ipconfig  /  start notepad">
-            <button class="primary-btn" id="runCmdBtn">Run</button>
+            <input id="pcCmd" placeholder="Type a command..." />
+            <button class="btn btn-accent" id="runCmdBtn">Run</button>
           </div>
-          <pre id="pcOutput" class="term-output">Output will appear here...</pre>
+          <pre class="term-output scrollbar" id="pcOutput"></pre>
         </div>
-        <div class="sysinfo" id="sysInfo"></div>
+        <div class="sys-info" id="sysInfo">Loading system info...</div>
       </section>
 
-      <!-- SETTINGS VIEW -->
+      <!-- SETTINGS -->
       <section class="view" id="view-settings">
         <div class="view-header"><h2>⚙️ Settings</h2></div>
         <div class="settings-form">
-          <div class="field">
-            <label>Groq API Key <span class="muted">(FREE — get at console.groq.com)</span></label>
-            <div class="term-row">
-              <input id="setGroqKey" type="password" placeholder="gsk_...">
-              <button class="primary-btn" id="saveKeyBtn">Save Key</button>
-            </div>
+          <div class="setting-row">
+            <label>Groq API Key <span>(free from console.groq.com)</span></label>
+            <input id="setGroqKey" type="password" placeholder="gsk_..." />
+            <button class="btn btn-accent" id="saveKeyBtn">Save Key</button>
           </div>
-          <div class="field">
+          <div class="setting-row">
             <label>AI Model</label>
             <select id="setModel">
-              <option value="llama-3.3-70b-versatile">Llama 3.3 70B (fast &amp; free)</option>
-              <option value="llama-3.1-8b-instant">Llama 3.1 8B (lightest)</option>
+              <option value="llama-3.3-70b-versatile">Llama 3.3 70B (fast)</option>
+              <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
               <option value="gemma2-9b-it">Gemma 2 9B</option>
+              <option value="llama-3.1-8b-instant">Llama 3.1 8B (instant)</option>
             </select>
           </div>
-          <div class="field">
-            <label>Reply Language</label>
+          <div class="setting-row">
+            <label>Language</label>
             <select id="setLang">
-              <option value="hinglish">Hinglish (recommended)</option>
+              <option value="hinglish">Hinglish</option>
               <option value="hindi">Hindi</option>
               <option value="english">English</option>
             </select>
           </div>
-          <div class="field">
+          <div class="setting-row">
             <label>Theme</label>
             <select id="setTheme">
               <option value="dark">Dark (default)</option>
@@ -164,16 +146,32 @@
               <option value="ocean">Ocean</option>
             </select>
           </div>
-          <div class="field">
+          <div class="setting-row">
             <label>Wake Word</label>
-            <input id="setWake" placeholder="hey velo">
+            <input id="setWake" value="hey velo" />
           </div>
-          <button class="primary-btn" id="saveSettingsBtn">Save Settings</button>
-          <p class="muted tiny">Everything is stored locally and privately on your machine. 100% free.</p>
+          <button class="btn btn-accent" id="saveSettingsBtn" style="width:100%;margin-top:16px;">Save All Settings</button>
         </div>
       </section>
     </main>
   </div>
-<script src="renderer.js"></script>
+
+  <!-- Note Editor Modal -->
+  <div class="modal-overlay" id="noteEditor" style="display:none">
+    <div class="modal">
+      <h3 id="noteEditorTitle">New Note</h3>
+      <input id="noteTitle" placeholder="Note title..." />
+      <textarea id="noteBody" rows="8" placeholder="Note content..."></textarea>
+      <div class="modal-actions">
+        <button class="btn btn-danger" id="cancelNoteBtn">Cancel</button>
+        <button class="btn btn-accent" id="saveNoteBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <script src="renderer.js"></script>
 </body>
 </html>

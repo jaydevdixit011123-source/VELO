@@ -1,8 +1,8 @@
 @echo off
-title VELO - Setup
+title VELO v3.1 - Setup
 echo.
 echo  ================================================
-echo    VELO v3.0  -  Easy One-Click Setup
+echo    VELO v3.1 - One-Click Setup
 echo  ================================================
 echo.
 cd /d "%~dp0"
@@ -10,28 +10,28 @@ cd /d "%~dp0"
 echo  [1/3] Checking Node.js...
 node -v >nul 2>nul
 if errorlevel 1 (
-  echo  [!] Node.js is NOT installed.
-  echo  Please install it from https://nodejs.org (LTS version), then run this again.
-  echo  Opening download page...
+  echo  [!] Node.js NOT found. Installing from nodejs.org...
   start https://nodejs.org
+  echo  Please install Node.js LTS, then run this again.
   pause
   exit /b 1
 )
-for /f "tokens=*" %%v in ('node -v') do echo  [+] Node.js %%v found.
+for /f "tokens=*" %%v in ('node -v') do echo  [+] Node %%v found.
 
-echo  [2/3] Installing dependencies (this may take a minute)...
+echo  [2/3] Installing Electron (one-time, ~2 min)...
 call npm install
 if errorlevel 1 (
-  echo  [!] npm install failed. Check your internet connection.
+  echo  [!] Install failed. Check internet and try again.
   pause
   exit /b 1
 )
 
-echo  [3/3] Setup complete!
+echo  [3/3] Done!
 echo.
-echo  To run VELO: open start.bat  (double-click)
+echo  ================================================
+echo  Double-click start.bat to launch VELO!
 echo.
-echo  Tip: Add a FREE Groq key (console.groq.com) in Settings for full AI chat.
-echo        Without it, VELO still runs in free Local Mode.
-echo.
+echo  Tip: Get a FREE Groq API key at console.groq.com
+echo        Add it in Settings for full AI chat.
+echo  ================================================
 pause

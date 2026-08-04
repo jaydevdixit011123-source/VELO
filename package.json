@@ -1,16 +1,14 @@
 {
   "name": "velo-desktop",
-  "version": "3.0.0",
-  "description": "VELO - Free, customisable, Jarvis-style personal AI desktop assistant. Pure JS, no native modules.",
-  "main": "src/main/main.js",
+  "version": "3.1.0",
+  "description": "VELO - Free personal AI desktop assistant. One-click install, pure JS.",
+  "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "setup": "node setup.js"
+    "start": "electron ."
   },
   "author": "Jaydev",
   "license": "MIT",
   "devDependencies": {
     "electron": "^33.0.0"
-  },
-  "dependencies": {}
+  }
 }
